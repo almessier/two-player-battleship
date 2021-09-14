@@ -1,4 +1,4 @@
 from game import Game
 
 battleship = Game()
-battleship.run()
+battleship.run_game()
