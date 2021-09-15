@@ -9,6 +9,7 @@ class Player:
     def __init__(self):
         self.name = 'Player'
         self.board = GameBoard()
+        self.target_board = GameBoard()
         self.des = Destroyer()
         self.sub = Submarine()
         self.bat = Battleship()
