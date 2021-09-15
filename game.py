@@ -8,7 +8,8 @@ class Game:
 
     def run_game(self):
         self.display_rules()
-        self.place_ships()
+        self.place_ships(self.user)
+        self.place_ships(self.opp)
         self.take_turn(self.user)
         self.take_turn(self.opp)
 
