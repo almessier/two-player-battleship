@@ -5,6 +5,7 @@ class Game:
     def __init__(self):
         self.user = Player()
         self.opp = Player()
+        self.run_game()
 
     def run_game(self):
         self.display_rules()
@@ -16,11 +17,14 @@ class Game:
     def display_rules(self):
         print('rules')
 
-    def place_ships(self, user):
-        self.display_grid(user)
-
     def display_grid(self, user):
         user.board.print_grid(user.board.grid)
+
+    def display_target_grid(self, user):
+        user.board.print_grid(user.target_board.grid)
+
+    def place_ships(self, user):
+        self.display_grid(user)
 
     def take_turn(self, user):
         pass
