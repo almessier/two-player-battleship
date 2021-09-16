@@ -23,12 +23,6 @@ class Game:
     def display_target_grid(self, user):
         user.board.print_grid(user.target_board.grid)
 
-    # Iterates through all of user's ships and has him/her assign x and y coordinates
-    def place_ships(self, user):
-        self.display_grid(user)
-        self.place_ships(self.user)
-        self.place_ships(self.opp)
-
     def place_ships(self, user):
         self.display_grid(user)
         for index in range(len(user.ships)):
