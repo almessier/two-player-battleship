@@ -23,21 +23,53 @@ class Game:
     def display_target_grid(self, user):
         user.board.print_grid(user.target_board.grid)
 
+    # Iterates through a user's ships, getting starting and ending locations
     def place_ships(self, user):
         self.display_grid(user)
-        for index in range(len(user.ships)):
-            self.place_ship_starting_location(user, index)
-            self.display_grid(user)
-            self.place_ship_ending_location(user)
-            self.display_grid(user)
+        for i in range(len(user.ships)):
+            self.place_ship_starting_location(user, i)
+            self.place_ship_ending_location(user, i)
 
-    def place_ship_starting_location(self, user, index):
-        x_value = self.convert_to_x_value(user.prompt_x(index, 'starting'))
-        y_value = self.convert_to_y_value(user.prompt_y(index, 'starting'))
-        user.board.grid[y_value][x_value] = user.ships[index].tag
+    # Prompts user for starting x and y location of the ship then displays an updated grid
+    def place_ship_starting_location(self, user, i):
+        user.ships[i].start_pos_x = self.convert_to_x_value(
+            user.prompt_x(i, 'starting'))
+        user.ships[i].start_pos_y = self.convert_to_y_value(
+            user.prompt_y(i, 'starting'))
+        user.board.grid[user.ships[i].start_pos_y][user.ships[i]
+                                                       .start_pos_x] = user.ships[i].tag
+        self.display_grid(user)
 
-    def place_ship_ending_location(self, user):
-        pass
+    # Prompts user for an ending x and y location of the ship, validates it, then displays an updated grid
+    def place_ship_ending_location(self, user, i):
+        valid = False
+        while (valid == False):
+            self.get_ending_position(user, i)
+            valid = self.validate_ship_length(user, i)
+        user.board.grid[user.ships[i].end_pos_y][user.ships[i].end_pos_x] = user.ships[i].tag
+        self.fill_in_blank_spaces(user, i)
+        self.display_grid(user)
+
+    # Prompts user for ending x and y location of the ship
+    def get_ending_position(self, user, i):
+        user.ships[i].end_pos_x = self.convert_to_x_value(
+            user.prompt_x(i, 'ending'))
+        user.ships[i].end_pos_y = self.convert_to_y_value(
+            user.prompt_y(i, 'ending'))
+
+    # Compares starting x and y locations to the ending locations to make sure theyre valid
+    def validate_ship_length(self, user, i):
+        # Checks if the length of the ship in the x axis directions is valid
+        if user.ships[i].start_pos_y == user.ships[i].end_pos_y and (user.ships[i].start_pos_x == user.ships[i].end_pos_x + (user.ships[i].length - 1) or user.ships[i].start_pos_x == user.ships[i].end_pos_x - (user.ships[i].length - 1)):
+            return True
+        # Checks if the length of the ship in the y axis directions is valid
+        elif user.ships[i].start_pos_x == user.ships[i].end_pos_x and (user.ships[i].start_pos_y == user.ships[i].end_pos_y + (user.ships[i].length - 1) or user.ships[i].start_pos_y == user.ships[i].end_pos_y - (user.ships[i].length - 1)):
+            return True
+        else:
+            print('Invalid location, try again.')
+            return False
+
+    def fill_in_blank_spaces(self, user, i):
 
     def take_turn(self, user):
         pass

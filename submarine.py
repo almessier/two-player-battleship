@@ -6,6 +6,6 @@ class Submarine(Ship):
         super().__init__()
         self.name = 'submarine'
         self.tag = 'SUB'
-        self.x_pos = 0
-        self.y_pos = 0
+        self.start_pos_x = 0
+        self.start_pos_y = 0
         self.length = 3

@@ -6,6 +6,8 @@ class Destroyer(Ship):
         super().__init__()
         self.name = 'destroyer'
         self.tag = 'DES'
-        self.x_pos = 0
-        self.y_pos = 0
+        self.start_pos_x = 0
+        self.start_pos_y = 0
+        self.end_pos_x = 0
+        self.end_pos_y = 0
         self.length = 2
