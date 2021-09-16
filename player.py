@@ -10,33 +10,25 @@ class Player:
         self.name = 'Player'
         self.board = GameBoard()
         self.target_board = GameBoard()
-        self.des = Destroyer()
-        self.sub = Submarine()
-        self.bat = Battleship()
-        self.air = AircraftCarrier()
+        self.ships = self.create_ships()
 
-    def prompt_x(self):
-        x_value = int(input(
-            'What x axis value from A to T would you like to place your destroyer?'))
-        return x_value
+    def create_ships(self):
+        des = Destroyer()
+        sub = Submarine()
+        bat = Battleship()
+        air = AircraftCarrier()
+        ships = [des, sub, bat, air]
+        return ships
 
-    def prompt_y(self):
+    def prompt_x(self, index, type):
+        x_letter = str(input(
+            f'Which x axis value from A to T would you like to place your {self.ships[index].name}\'s {type} location? It is {self.ships[index].length} units long: '))
+        return x_letter
+
+    def prompt_y(self, index, type):
         y_value = int(input(
-            'What y axis value from 1 to 20 would you like to place your destroyer?'))
+            f'Which y axis value from 1 to 20 would you like to place your {self.ships[index].name}\'s {type} location? It is {self.ships[index].length} units long: '))
         return y_value
-
-    def place_des(self):
-        x_value = self.prompt_x()
-        y_value = self.prompt_y()
-
-    def place_sub(self):
-        pass
-
-    def place_bat(self):
-        pass
-
-    def place_air(self):
-        pass
 
     def attack(self):
         pass
