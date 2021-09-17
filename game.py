@@ -46,7 +46,6 @@ class Game:
         while (valid == False):
             self.get_ending_position(user, i)
             valid = self.validate_ship_length(user, i)
-        user.board.grid[user.ships[i].end_pos_y][user.ships[i].end_pos_x] = user.ships[i].tag
         self.fill_in_blank_spaces(user, i)
         self.display_grid(user)
 
@@ -70,6 +69,42 @@ class Game:
             return False
 
     def fill_in_blank_spaces(self, user, i):
+        if user.ships[i].start_pos_x == user.ships[i].end_pos_x and user.ships[i].start_pos_y > user.ships[i].end_pos_y:
+            self.fill_up(user, i)
+        elif user.ships[i].start_pos_x == user.ships[i].end_pos_x and user.ships[i].start_pos_y < user.ships[i].end_pos_y:
+            self.fill_down(user, i)
+        elif user.ships[i].start_pos_y == user.ships[i].end_pos_y and user.ships[i].start_pos_x > user.ships[i].end_pos_x:
+            self.fill_left(user, i)
+        else:
+            self.fill_right(user, i)
+
+    def fill_up(self, user, i):
+        j = 0
+        for num in range(user.ships[i].length):
+            user.board.grid[user.ships[i].start_pos_y +
+                            j][user.ships[i].start_pos_x] = user.ships[i].tag
+            j -= 1
+
+    def fill_down(self, user, i):
+        j = 0
+        for num in range(user.ships[i].length):
+            user.board.grid[user.ships[i].start_pos_y +
+                            j][user.ships[i].start_pos_x] = user.ships[i].tag
+            j += 1
+
+    def fill_left(self, user, i):
+        j = 0
+        for num in range(user.ships[i].length):
+            user.board.grid[user.ships[i].start_pos_y][user.ships[i].start_pos_x +
+                                                       j] = user.ships[i].tag
+            j -= 1
+
+    def fill_right(self, user, i):
+        j = 0
+        for num in range(user.ships[i].length):
+            user.board.grid[user.ships[i].start_pos_y][user.ships[i].start_pos_x +
+                                                       j] = user.ships[i].tag
+            j += 1
 
     def take_turn(self, user):
         pass

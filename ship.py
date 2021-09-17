@@ -5,3 +5,4 @@ class Ship:
         self.x_pos = 0
         self.y_pos = 0
         self.length = 0
+        self.alive = True
