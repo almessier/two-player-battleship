@@ -104,17 +104,17 @@ class Game:
         elif direction == 'left':
             user.ships[i].y_positions.append(user.ships[i].start_pos_y)
             for num in range(user.ships[i].length):
-                user.ships[i].y_positions.append(
-                    user.ships[i].start_pos_y - num)
+                user.ships[i].x_positions.append(
+                    user.ships[i].start_pos_x - num)
         else:
             user.ships[i].y_positions.append(user.ships[i].start_pos_y)
             for num in range(user.ships[i].length):
-                user.ships[i].y_positions.append(
-                    user.ships[i].start_pos_y + num)
+                user.ships[i].x_positions.append(
+                    user.ships[i].start_pos_x + num)
 
     # Assigns the x and y coordinates of the ship to the user's grid
     def assign_coordinates_to_grid(self, user, i, direction):
-        if direction == 'up' or 'down':
+        if direction == 'up' or direction == 'down':
             for pos in user.ships[i].y_positions:
                 user.board.grid[pos][user.ships[i].start_pos_x] = user.ships[i].tag
         else:
