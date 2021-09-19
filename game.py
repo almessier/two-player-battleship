@@ -49,10 +49,16 @@ class Game:
 
     # Prompts user for x and y location of the ship
     def get_position(self, user, i, type):
-        pos = list(user.pick_location(i, 'place', type))
+        pos = self.convert_to_x_y(
+            list(user.pick_location(i, type, 'placement')))
+        return pos
+
+    # Converts user input into usable grid coordinates
+    def convert_to_x_y(self, pos):
         pos[0] = self.convert_to_x_value(pos[0])
         if len(pos) == 3:
             pos[1] = int(str(pos[1]) + str(pos[2]))
+            pos.pop(2)
         pos[1] = self.convert_to_y_value(pos[1])
         return pos
 
@@ -125,6 +131,8 @@ class Game:
 
     def take_turn(self, user):
         self.display_target_grid(user)
+        attack_pos = self.convert_to_x_y(
+            list(user.pick_location(0, '', 'attack')))
 
     def convert_to_x_value(self, input):
         alphabet = 'ABCDEFGHIJKLMNOPQRST'
