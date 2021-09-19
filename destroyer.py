@@ -7,3 +7,4 @@ class Destroyer(Ship):
         self.name = 'destroyer'
         self.tag = 'DES'
         self.length = 2
+        self.health = 2

@@ -7,3 +7,4 @@ class Battleship(Ship):
         self.name = 'battleship'
         self.tag = 'BAT'
         self.length = 4
+        self.health = 4

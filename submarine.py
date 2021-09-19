@@ -7,3 +7,4 @@ class Submarine(Ship):
         self.name = 'submarine'
         self.tag = 'SUB'
         self.length = 3
+        self.health = 3

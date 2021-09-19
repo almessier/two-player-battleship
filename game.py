@@ -11,8 +11,8 @@ class Game:
         self.display_rules()
         self.place_ships(self.user)
         self.place_ships(self.opp)
-        self.take_turn(self.user)
-        self.take_turn(self.opp)
+        self.take_turn(self.user, self.opp)
+        self.take_turn(self.opp, self.user)
 
     def display_rules(self):
         print('rules')
@@ -129,10 +129,38 @@ class Game:
             for pos in user.ships[i].x_positions:
                 user.board.grid[start_pos[1]][pos] = user.ships[i].tag
 
-    def take_turn(self, user):
+    def take_turn(self, user, opp):
         self.display_target_grid(user)
         attack_pos = self.convert_to_x_y(
             list(user.pick_location(0, '', 'attack')))
+        self.attack_location(user, opp, attack_pos)
+        self.track_score(user, opp)
+
+    def attack_location(self, user, opp, attack_pos):
+        counter = 0
+        for i in range(len(opp.ships)):
+            if opp.board.grid[attack_pos[1]][attack_pos[0]] == opp.ships[i].tag:
+                self.assign_hit_type_to_grids(user, opp, attack_pos, 'HIT')
+                self.deal_damage_to_ship(opp, i)
+                self.check_for_sink(opp, i)
+            else:
+                counter += 1
+        if counter == len(opp.ships):
+            self.assign_hit_type_to_grids(user, opp, attack_pos, 'MIS')
+
+    def assign_hit_type_to_grids(self, user, opp, attack_pos, tag):
+        user.board.target_grid[attack_pos[1]][attack_pos[0]] = tag
+        opp.board.grid[attack_pos[1]][attack_pos[0]] = tag
+
+    def deal_damage_to_ship(self, opp, i):
+        opp.ships[i].health -= 1
+
+    def check_for_sink(self, opp, i):
+        if opp.ships[i].health == 0:
+            opp.ships[i].alive = False
+
+    def track_score(self):
+        pass
 
     def convert_to_x_value(self, input):
         alphabet = 'ABCDEFGHIJKLMNOPQRST'
