@@ -27,102 +27,104 @@ class Game:
     def place_ships(self, user):
         self.display_grid(user)
         for i in range(len(user.ships)):
-            self.place_ship_starting_location(user, i)
-            self.place_ship_ending_location(user, i)
+            start_pos = self.place_ship_starting_location(user, i)
+            self.place_ship_ending_location(user, i, start_pos)
 
     # Prompts user for starting x and y location of the ship then displays an updated grid
     def place_ship_starting_location(self, user, i):
-        user.ships[i].start_pos_x = self.convert_to_x_value(
-            user.prompt_x(i, 'starting'))
-        user.ships[i].start_pos_y = self.convert_to_y_value(
-            user.prompt_y(i, 'starting'))
-        user.board.grid[user.ships[i].start_pos_y][user.ships[i]
-                                                       .start_pos_x] = user.ships[i].tag
+        start_pos = self.get_position(user, i, 'starting')
+        user.board.grid[start_pos[1]][start_pos[0]] = user.ships[i].tag
         self.display_grid(user)
-        user.board.grid[user.ships[i].start_pos_y][user.ships[i]
-                                                       .start_pos_x] = '[ ]'
+        user.board.grid[start_pos[1]][start_pos[0]] = '[ ]'
+        return start_pos
 
     # Prompts user for an ending x and y location of the ship, validates it, then displays an updated grid
-    def place_ship_ending_location(self, user, i):
+    def place_ship_ending_location(self, user, i, start_pos):
         valid = False
         while (valid == False):
-            self.get_ending_position(user, i)
-            valid = self.validate_ship_length(user, i)
-        self.spawn_ship(user, i)
+            end_pos = self.get_position(user, i, 'ending')
+            valid = self.validate_ship_length(user, i, start_pos, end_pos)
+        self.spawn_ship(user, i, start_pos, end_pos)
         self.display_grid(user)
 
-    # Prompts user for ending x and y location of the ship
-    def get_ending_position(self, user, i):
-        user.ships[i].end_pos_x = self.convert_to_x_value(
-            user.prompt_x(i, 'ending'))
-        user.ships[i].end_pos_y = self.convert_to_y_value(
-            user.prompt_y(i, 'ending'))
+    # Prompts user for x and y location of the ship
+    def get_position(self, user, i, type):
+        pos = list(user.pick_location(i, 'place', type))
+        pos[0] = self.convert_to_x_value(pos[0])
+        if len(pos) == 3:
+            pos[1] = int(str(pos[1]) + str(pos[2]))
+        pos[1] = self.convert_to_y_value(pos[1])
+        return pos
 
     # Compares starting x and y locations to the ending locations to make sure theyre valid
-    def validate_ship_length(self, user, i):
+    def validate_ship_length(self, user, i, start_pos, end_pos):
         # Checks if the length of the ship in the x axis directions is valid
-        if user.ships[i].start_pos_y == user.ships[i].end_pos_y and (user.ships[i].start_pos_x == user.ships[i].end_pos_x + (user.ships[i].length - 1) or user.ships[i].start_pos_x == user.ships[i].end_pos_x - (user.ships[i].length - 1)):
+        if start_pos[1] == end_pos[1] and (start_pos[0] == end_pos[0] + (user.ships[i].length - 1) or start_pos[0] == end_pos[0] - (user.ships[i].length - 1)):
             return True
         # Checks if the length of the ship in the y axis directions is valid
-        elif user.ships[i].start_pos_x == user.ships[i].end_pos_x and (user.ships[i].start_pos_y == user.ships[i].end_pos_y + (user.ships[i].length - 1) or user.ships[i].start_pos_y == user.ships[i].end_pos_y - (user.ships[i].length - 1)):
+        elif start_pos[0] == end_pos[0] and (start_pos[1] == end_pos[1] + (user.ships[i].length - 1) or start_pos[1] == end_pos[1] - (user.ships[i].length - 1)):
             return True
         else:
             print('Invalid location, try again.')
             return False
 
     # Creates the ship on the grid
-    def spawn_ship(self, user, i):
-        if user.ships[i].start_pos_x == user.ships[i].end_pos_x and user.ships[i].start_pos_y > user.ships[i].end_pos_y:
+    def spawn_ship(self, user, i, start_pos, end_pos):
+        if start_pos[0] == end_pos[0] and start_pos[1] > end_pos[1]:
             direction = 'up'
-            self.assign_ship_x_y_coordinates(user, i, direction)
-            self.assign_coordinates_to_grid(user, i, direction)
-        elif user.ships[i].start_pos_x == user.ships[i].end_pos_x and user.ships[i].start_pos_y < user.ships[i].end_pos_y:
+            self.assign_coordinates_to_ship(
+                user, i, start_pos, direction)
+            self.assign_coordinates_to_grid(user, i, start_pos, direction)
+        elif start_pos[0] == end_pos[0] and start_pos[1] < end_pos[1]:
             direction = 'down'
-            self.assign_ship_x_y_coordinates(user, i, direction)
-            self.assign_coordinates_to_grid(user, i, direction)
-        elif user.ships[i].start_pos_y == user.ships[i].end_pos_y and user.ships[i].start_pos_x > user.ships[i].end_pos_x:
+            self.assign_coordinates_to_ship(
+                user, i, start_pos, direction)
+            self.assign_coordinates_to_grid(user, i, start_pos, direction)
+        elif start_pos[1] == end_pos[1] and start_pos[0] > end_pos[0]:
             direction = 'left'
-            self.assign_ship_x_y_coordinates(user, i, direction)
-            self.assign_coordinates_to_grid(user, i, direction)
+            self.assign_coordinates_to_ship(
+                user, i, start_pos, direction)
+            self.assign_coordinates_to_grid(user, i, start_pos, direction)
         else:
             direction = 'right'
-            self.assign_ship_x_y_coordinates(user, i, direction)
-            self.assign_coordinates_to_grid(user, i, direction)
+            self.assign_coordinates_to_ship(
+                user, i, start_pos, direction)
+            self.assign_coordinates_to_grid(user, i, start_pos, direction)
 
     # Assigns the x and y coordinates of the ship to the user's current ship object
-    def assign_ship_x_y_coordinates(self, user, i, direction):
+    def assign_coordinates_to_ship(self, user, i, start_pos, direction):
         if direction == 'up':
-            user.ships[i].x_positions.append(user.ships[i].start_pos_x)
+            user.ships[i].x_positions.append(start_pos[0])
             for num in range(user.ships[i].length):
                 user.ships[i].y_positions.append(
-                    user.ships[i].start_pos_y - num)
+                    start_pos[1] - num)
         elif direction == 'down':
-            user.ships[i].x_positions.append(user.ships[i].start_pos_x)
+            user.ships[i].x_positions.append(start_pos[0])
             for num in range(user.ships[i].length):
                 user.ships[i].y_positions.append(
-                    user.ships[i].start_pos_y + num)
+                    start_pos[1] + num)
         elif direction == 'left':
-            user.ships[i].y_positions.append(user.ships[i].start_pos_y)
+            user.ships[i].y_positions.append(start_pos[1])
             for num in range(user.ships[i].length):
                 user.ships[i].x_positions.append(
-                    user.ships[i].start_pos_x - num)
+                    start_pos[0] - num)
         else:
-            user.ships[i].y_positions.append(user.ships[i].start_pos_y)
+            user.ships[i].y_positions.append(start_pos[1])
             for num in range(user.ships[i].length):
                 user.ships[i].x_positions.append(
-                    user.ships[i].start_pos_x + num)
+                    start_pos[0] + num)
 
     # Assigns the x and y coordinates of the ship to the user's grid
-    def assign_coordinates_to_grid(self, user, i, direction):
+    def assign_coordinates_to_grid(self, user, i, start_pos, direction):
         if direction == 'up' or direction == 'down':
             for pos in user.ships[i].y_positions:
-                user.board.grid[pos][user.ships[i].start_pos_x] = user.ships[i].tag
+                user.board.grid[pos][start_pos[0]] = user.ships[i].tag
         else:
             for pos in user.ships[i].x_positions:
-                user.board.grid[user.ships[i].start_pos_y][pos] = user.ships[i].tag
+                user.board.grid[start_pos[1]][pos] = user.ships[i].tag
 
     def take_turn(self, user):
-        pass
+        self.display_target_grid(user)
 
     def convert_to_x_value(self, input):
         alphabet = 'ABCDEFGHIJKLMNOPQRST'
@@ -134,4 +136,4 @@ class Game:
             num += 1
 
     def convert_to_y_value(self, input):
-        return input - 1
+        return int(input) - 1

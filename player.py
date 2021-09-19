@@ -20,15 +20,11 @@ class Player:
         ships = [des, sub, bat, air]
         return ships
 
-    def prompt_x(self, i, type):
-        x_letter = str(input(
-            f'Which x axis value from A to T would you like to place your {self.ships[i].name}\'s {type} location? It is {self.ships[i].length} units long: '))
-        return x_letter
-
-    def prompt_y(self, i, type):
-        y_value = int(input(
-            f'Which y axis value from 1 to 20 would you like to place your {self.ships[i].name}\'s {type} location? It is {self.ships[i].length} units long: '))
-        return y_value
-
-    def attack(self):
-        pass
+    def pick_location(self, i, placement_type, start_end_type):
+        if placement_type == 'place':
+            location = str(
+                input(f'Where would you like to place your {self.ships[i].name}\'s {start_end_type} location? It is {self.ships[i].length} units long. Grid goes from A1 to T20: '))
+        else:
+            location = str(
+                input('Where would you like to attack? Grid goes from A1 to T20: '))
+        return location
