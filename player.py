@@ -10,6 +10,7 @@ class Player:
         self.name = 'Player'
         self.board = GameBoard()
         self.target_board = GameBoard()
+        self.score = 0
         self.ships = self.create_ships()
 
     def create_ships(self):

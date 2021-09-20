@@ -9,10 +9,21 @@ class Game:
 
     def run_game(self):
         self.display_rules()
-        self.place_ships(self.user)
-        self.place_ships(self.opp)
-        self.take_turn(self.user, self.opp)
-        self.take_turn(self.opp, self.user)
+        play_status = True
+        while(play_status == True):
+            self.place_ships(self.user)
+            self.place_ships(self.opp)
+            while(True):
+                self.take_turn(self.user, self.opp)
+                if self.user.score == len(self.user.ships):
+                    self.display_score(self.user, self.opp)
+                    break
+                self.take_turn(self.opp, self.user)
+                if self.opp.score == len(self.opp.ships):
+                    self.display_score(self.opp, self.user)
+                    break
+            print('You have won the battle!')
+            play_status = self.play_again()
 
     def display_rules(self):
         print('rules')
@@ -51,15 +62,6 @@ class Game:
     def get_position(self, user, i, type):
         pos = self.convert_to_x_y(
             list(user.pick_location(i, type, 'placement')))
-        return pos
-
-    # Converts user input into usable grid coordinates
-    def convert_to_x_y(self, pos):
-        pos[0] = self.convert_to_x_value(pos[0])
-        if len(pos) == 3:
-            pos[1] = int(str(pos[1]) + str(pos[2]))
-            pos.pop(2)
-        pos[1] = self.convert_to_y_value(pos[1])
         return pos
 
     # Compares starting x and y locations to the ending locations to make sure theyre valid
@@ -130,11 +132,13 @@ class Game:
                 user.board.grid[start_pos[1]][pos] = user.ships[i].tag
 
     def take_turn(self, user, opp):
+        self.display_grid(user)
         self.display_target_grid(user)
+        self.display_score(user, opp)
         attack_pos = self.convert_to_x_y(
             list(user.pick_location(0, '', 'attack')))
         self.attack_location(user, opp, attack_pos)
-        self.track_score(user, opp)
+        self.update_score(user, opp)
 
     def attack_location(self, user, opp, attack_pos):
         counter = 0
@@ -149,7 +153,7 @@ class Game:
             self.assign_hit_type_to_grids(user, opp, attack_pos, 'MIS')
 
     def assign_hit_type_to_grids(self, user, opp, attack_pos, tag):
-        user.board.target_grid[attack_pos[1]][attack_pos[0]] = tag
+        user.target_board.grid[attack_pos[1]][attack_pos[0]] = tag
         opp.board.grid[attack_pos[1]][attack_pos[0]] = tag
 
     def deal_damage_to_ship(self, opp, i):
@@ -159,8 +163,34 @@ class Game:
         if opp.ships[i].health == 0:
             opp.ships[i].alive = False
 
-    def track_score(self):
-        pass
+    def update_score(self, user, opp):
+        counter = 0
+        for i in range(len(opp.ships)):
+            if opp.ships[i].alive == False:
+                counter += 1
+        user.score = counter
+
+    def display_score(self, user, opp):
+        print(
+            f'You have sunk {user.score} ships and your opponent has sunk {opp.score} ships.')
+
+    def play_again(self):
+        valid_play_again = self.validate_yes_no('play_again')
+        if valid_play_again == 'y':
+            self.user = Player()
+            self.opp = Player()
+            return True
+        else:
+            return False
+
+    # Converts user input into usable grid coordinates
+    def convert_to_x_y(self, pos):
+        pos[0] = self.convert_to_x_value(pos[0])
+        if len(pos) == 3:
+            pos[1] = int(str(pos[1]) + str(pos[2]))
+            pos.pop(2)
+        pos[1] = self.convert_to_y_value(pos[1])
+        return pos
 
     def convert_to_x_value(self, input):
         alphabet = 'ABCDEFGHIJKLMNOPQRST'
@@ -173,3 +203,32 @@ class Game:
 
     def convert_to_y_value(self, input):
         return int(input) - 1
+
+    def convert_to_y_or_n(self, input):
+        if input.lower() == 'yes' or input.lower() == 'y':
+            return 'y'
+        elif input.lower() == 'no' or input.lower() == 'n':
+            return 'n'
+        else:
+            return 'invalid'
+
+    def validate_yes_no(self, type):
+        valid = False
+        while(valid == False):
+            if type == 'view_grid':
+                user_input = str(
+                    input('Do you want to view your ocean grid? y/n: '))
+            elif type == 'done_with_grid':
+                user_input = str(
+                    input('Are you done viewing your ocean grid? y/n: '))
+            else:
+                user_input = str(input('Do you want to play again? y/n: '))
+            user_question = self.convert_to_y_or_n(user_input)
+            if user_question == 'invalid':
+                valid = False
+                print('Invalid input, try again.')
+            elif user_question == 'y' or 'n':
+                valid = True
+                return user_question
+            else:
+                valid = False
