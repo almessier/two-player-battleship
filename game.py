@@ -7,6 +7,7 @@ class Game:
         self.opp = Player()
         self.run_game()
 
+    # Handles the logic for the flow of the game
     def run_game(self):
         self.display_rules()
         play_status = True
@@ -64,14 +65,16 @@ class Game:
                 user, i, 'ocean', 'ending', 'placement')
             valid_length = self.validate_ship_length(
                 user, i, start_pos, end_pos)
-            valid_collision = self.validate_collisions()
+            valid_collision = self.spawn_ship(
+                user, i, start_pos, end_pos, 'validate')
             if valid_length == False or valid_collision == False:
+                self.clear_ship_coordinates(user, i)
                 valid = False
                 print('Invalid input, going back to placing starting location.')
                 return False
             else:
                 valid = True
-                self.spawn_ship(user, i, start_pos, end_pos)
+                self.spawn_ship(user, i, start_pos, end_pos, 'spawn')
         self.display_grid(user)
         return True
 
@@ -88,16 +91,35 @@ class Game:
                     print('Invalid input, try again.')
             pos = self.convert_to_x_y(pos)
             grid_check = self.validate_within_grid(user, pos)
-            collision_check = self.validate_no_start_collision(
-                user, pos, grid_type)
+            if start_or_end_type == 'starting' or placement_type == 'attack':
+                collision_check = self.validate_no_start_collision(
+                    user, pos, grid_type)
+            else:
+                # Defaults collision check to True when looking for ending position since the program is going to validate that later
+                collision_check = True
             if grid_check == True and collision_check == True:
                 valid = True
             else:
                 print('Invalid input, try again.')
         return pos
 
-    def validate_collisions(self):
-        return True
+    def clear_ship_coordinates(self, user, i):
+        user.ships[i].x_positions.clear()
+        user.ships[i].y_positions.clear()
+
+    def validate_no_collisions(self, user, i, start_pos, direction):
+        if direction == 'up' or direction == 'down':
+            for pos in user.ships[i].y_positions:
+                for j in range(len(user.ships)):
+                    if user.board.grid[pos][start_pos[0]] == user.ships[j].tag:
+                        return False
+            return True
+        else:
+            for pos in user.ships[i].x_positions:
+                for j in range(len(user.ships)):
+                    if user.board.grid[start_pos[1]][pos] == user.ships[j].tag:
+                        return False
+            return True
 
     def validate_position_input(self, user, pos):
         if len(pos) > 3 or len(pos) < 2:
@@ -166,34 +188,47 @@ class Game:
         return True
 
     # Creates the ship on the grid
-    def spawn_ship(self, user, i, start_pos, end_pos):
+    def spawn_ship(self, user, i, start_pos, end_pos, type):
         if start_pos[0] == end_pos[0] and start_pos[1] > end_pos[1]:
             direction = 'up'
             self.assign_coordinates_to_ship(
                 user, i, start_pos, direction)
-            self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            if type == 'spawn':
+                self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            else:
+                valid = self.validate_no_collisions(
+                    user, i, start_pos, direction)
+                return valid
         elif start_pos[0] == end_pos[0] and start_pos[1] < end_pos[1]:
             direction = 'down'
             self.assign_coordinates_to_ship(
                 user, i, start_pos, direction)
-            self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            if type == 'spawn':
+                self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            else:
+                valid = self.validate_no_collisions(
+                    user, i, start_pos, direction)
+                return valid
         elif start_pos[1] == end_pos[1] and start_pos[0] > end_pos[0]:
             direction = 'left'
             self.assign_coordinates_to_ship(
                 user, i, start_pos, direction)
-            self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            if type == 'spawn':
+                self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            else:
+                valid = self.validate_no_collisions(
+                    user, i, start_pos, direction)
+                return valid
         else:
             direction = 'right'
             self.assign_coordinates_to_ship(
                 user, i, start_pos, direction)
-            self.assign_coordinates_to_grid(user, i, start_pos, direction)
-
-    def not_valid_clear_ship_coordinates(self, user, i, valid):
-        if valid == False:
-            user.ships[i].x_positions.clear()
-            user.ships[i].y_positions.clear()
-            return False
-        return True
+            if type == 'spawn':
+                self.assign_coordinates_to_grid(user, i, start_pos, direction)
+            else:
+                valid = self.validate_no_collisions(
+                    user, i, start_pos, direction)
+                return valid
 
     # Assigns the x and y coordinates of the ship to the user's current ship object
     def assign_coordinates_to_ship(self, user, i, start_pos, direction):
