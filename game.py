@@ -119,12 +119,14 @@ class Game:
 
     def validate_y(self, user, pos):
         if len(pos) == 3:
-            if type(pos[1]) != int and type(pos[2]) != int:
+            if pos[1].isdigit() == True and pos[2].isdigit() == True:
+                pos[1] = int(str(pos[1]) + str(pos[2]))
+                pos.pop(2)
+            else:
                 return False
-            pos[1] = int(str(pos[1]) + str(pos[2]))
-            pos.pop(2)
-        if type(pos[1]) != int:
-            return False
+        else:
+            if pos[1].isdigit() != True:
+                return False
         for i in range(user.board.side_length):
             if int(pos[1]) == int(i + 1):
                 return True
