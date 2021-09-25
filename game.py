@@ -22,11 +22,12 @@ class Game:
                 if self.opp.score == len(self.opp.ships):
                     self.display_score(self.opp, self.user)
                     break
-            print('You have won the battle!')
+            self.display_victory()
             play_status = self.play_again()
 
     def display_rules(self):
-        print('rules')
+        print('Each player places four ships on their own 20 x 20 grid. Take turns blindly attacking your opponent\'s grid until you sink all of their ships.')
+        print('All grid coordinate prompts will be handled with LetterNumber inputs. (A1, A2, etc)')
 
     def display_grid(self, user):
         user.board.print_grid(user.board.grid)
@@ -34,16 +35,22 @@ class Game:
     def display_target_grid(self, user):
         user.board.print_grid(user.target_board.grid)
 
+    def display_victory(self):
+        print('You have won the battle!')
+
     # Iterates through a user's ships, getting starting and ending locations
     def place_ships(self, user):
         self.display_grid(user)
         for i in range(len(user.ships)):
-            start_pos = self.place_ship_starting_location(user, i)
-            self.place_ship_ending_location(user, i, start_pos)
+            valid_end = False
+            while valid_end == False:
+                start_pos = self.place_ship_starting_location(user, i)
+                valid_end = self.place_ship_ending_location(user, i, start_pos)
 
     # Prompts user for starting x and y location of the ship then displays an updated grid
     def place_ship_starting_location(self, user, i):
-        start_pos = self.get_position(user, i, 'starting')
+        start_pos = self.get_position(
+            user, i, 'ocean', 'starting', 'placement')
         user.board.grid[start_pos[1]][start_pos[0]] = user.ships[i].tag
         self.display_grid(user)
         user.board.grid[start_pos[1]][start_pos[0]] = '[ ]'
@@ -53,16 +60,75 @@ class Game:
     def place_ship_ending_location(self, user, i, start_pos):
         valid = False
         while (valid == False):
-            end_pos = self.get_position(user, i, 'ending')
-            valid = self.validate_ship_length(user, i, start_pos, end_pos)
-        self.spawn_ship(user, i, start_pos, end_pos)
+            end_pos = self.get_position(
+                user, i, 'ocean', 'ending', 'placement')
+            valid_length = self.validate_ship_length(
+                user, i, start_pos, end_pos)
+            valid_collision = self.validate_collisions()
+            if valid_length == False or valid_collision == False:
+                valid = False
+                print('Invalid input, going back to placing starting location.')
+                return False
+            else:
+                valid = True
+                self.spawn_ship(user, i, start_pos, end_pos)
         self.display_grid(user)
+        return True
 
     # Prompts user for x and y location of the ship
-    def get_position(self, user, i, type):
-        pos = self.convert_to_x_y(
-            list(user.pick_location(i, type, 'placement')))
+    def get_position(self, user, i, grid_type, start_or_end_type, placement_type):
+        valid = False
+        while (valid == False):
+            pos_check = False
+            while (pos_check == False):
+                pos = list(user.pick_location(
+                    i, start_or_end_type, placement_type))
+                pos_check = self.validate_position_input(user, pos)
+                if pos_check == False:
+                    print('Invalid input, try again.')
+            pos = self.convert_to_x_y(pos)
+            grid_check = self.validate_within_grid(user, pos)
+            collision_check = self.validate_no_start_collision(
+                user, pos, grid_type)
+            if grid_check == True and collision_check == True:
+                valid = True
+            else:
+                print('Invalid input, try again.')
         return pos
+
+    def validate_collisions(self):
+        return True
+
+    def validate_position_input(self, user, pos):
+        if len(pos) > 3 or len(pos) < 2:
+            return False
+        valid_x = self.validate_x(pos)
+        valid_y = self.validate_y(user, pos)
+        if valid_x == False:
+            return False
+        if valid_y == False:
+            return False
+        return True
+
+    def validate_x(self, pos):
+        alphabet = 'ABCDEFGHIJKLMNOPQRST'
+        for letter in alphabet:
+            if pos[0].upper() == letter:
+                return True
+        return False
+
+    def validate_y(self, user, pos):
+        if len(pos) == 3:
+            if type(pos[1]) != int and type(pos[2]) != int:
+                return False
+            pos[1] = int(str(pos[1]) + str(pos[2]))
+            pos.pop(2)
+        if type(pos[1]) != int:
+            return False
+        for i in range(user.board.side_length):
+            if int(pos[1]) == int(i + 1):
+                return True
+        return False
 
     # Compares starting x and y locations to the ending locations to make sure theyre valid
     def validate_ship_length(self, user, i, start_pos, end_pos):
@@ -73,8 +139,29 @@ class Game:
         elif start_pos[0] == end_pos[0] and (start_pos[1] == end_pos[1] + (user.ships[i].length - 1) or start_pos[1] == end_pos[1] - (user.ships[i].length - 1)):
             return True
         else:
-            print('Invalid location, try again.')
             return False
+
+    def validate_within_grid(self, user, pos):
+        for i in range(user.board.side_length):
+            if pos[0] == i:
+                valid_x = True
+        for i in range(user.board.side_length):
+            if pos[1] == i:
+                valid_y = True
+        if valid_x == True and valid_y == True:
+            return True
+        else:
+            return False
+
+    def validate_no_start_collision(self, user, pos, grid_type):
+        if grid_type == 'ocean':
+            for i in range(len(user.ships)):
+                if user.board.grid[pos[1]][pos[0]] == user.ships[i].tag:
+                    return False
+        else:
+            if user.target_board.grid[pos[1]][pos[0]] == 'HIT' or user.target_board.grid[pos[1]][pos[0]] == 'MIS':
+                return False
+        return True
 
     # Creates the ship on the grid
     def spawn_ship(self, user, i, start_pos, end_pos):
@@ -99,6 +186,13 @@ class Game:
                 user, i, start_pos, direction)
             self.assign_coordinates_to_grid(user, i, start_pos, direction)
 
+    def not_valid_clear_ship_coordinates(self, user, i, valid):
+        if valid == False:
+            user.ships[i].x_positions.clear()
+            user.ships[i].y_positions.clear()
+            return False
+        return True
+
     # Assigns the x and y coordinates of the ship to the user's current ship object
     def assign_coordinates_to_ship(self, user, i, start_pos, direction):
         if direction == 'up':
@@ -122,7 +216,7 @@ class Game:
                 user.ships[i].x_positions.append(
                     start_pos[0] + num)
 
-    # Assigns the x and y coordinates of the ship to the user's grid
+    # Assigns the x and y coordinates of the ship to the user's grid and checks for collisions
     def assign_coordinates_to_grid(self, user, i, start_pos, direction):
         if direction == 'up' or direction == 'down':
             for pos in user.ships[i].y_positions:
@@ -135,8 +229,7 @@ class Game:
         self.display_grid(user)
         self.display_target_grid(user)
         self.display_score(user, opp)
-        attack_pos = self.convert_to_x_y(
-            list(user.pick_location(0, '', 'attack')))
+        attack_pos = self.get_position(user, 0, 'target', '', 'attack')
         self.attack_location(user, opp, attack_pos)
         self.update_score(user, opp)
 
@@ -196,7 +289,7 @@ class Game:
         alphabet = 'ABCDEFGHIJKLMNOPQRST'
         num = 0
         for letter in alphabet:
-            if letter == input:
+            if letter == input.upper():
                 x_value = num
                 return x_value
             num += 1
