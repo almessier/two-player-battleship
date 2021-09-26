@@ -10,6 +10,7 @@ class Game:
     # Handles the logic for the flow of the game
     def run_game(self):
         self.display_rules_and_confirm()
+        self.assign_names()
         play_status = True
         while(play_status == True):
             self.place_ships(self.user)
@@ -27,20 +28,38 @@ class Game:
             play_status = self.play_again()
 
     def display_rules(self):
-        print('Each player places four ships on their own 20 x 20 grid. Take turns blindly attacking your opponent\'s grid until you sink all of their ships.')
+        print('')
+        print('Each player places four ships on their own 20 x 20 grid and then takes turns blindly attacking their opponent\'s grid until someones sinks all of their opponent\'s ships.')
         print('All grid coordinate prompts will be handled with LetterNumber inputs. (A1, A2, etc)')
+        print('')
 
     def display_grid(self, user):
+        print('')
+        print('Ocean Grid')
         user.board.print_grid(user.board.grid)
 
     def display_target_grid(self, user):
+        print('')
+        print('Target Grid')
         user.board.print_grid(user.target_board.grid)
+
+    def display_turn(self, user):
+        print('')
+        print('')
+        print('')
+        print(f'{user.name}\'s Turn')
+
+    def assign_names(self):
+        self.user.name = 'Player 1'
+        self.opp.name = 'Player 2'
 
     def display_victory(self):
         print('You have won the battle!')
+        print('')
 
     # Iterates through a user's ships, getting starting and ending locations
     def place_ships(self, user):
+        self.display_turn(user)
         self.display_grid(user)
         for i in range(len(user.ships)):
             valid_end = False
@@ -88,7 +107,13 @@ class Game:
                     i, start_or_end_type, placement_type))
                 pos_check = self.validate_position_input(user, pos)
                 if pos_check == False:
-                    print('Invalid input, try again.')
+                    # Checks if user wants to view their grid
+                    if ''.join(pos).lower() == 'ocean':
+                        self.display_grid(user)
+                    elif ''.join(pos).lower() == 'target':
+                        self.display_target_grid(user)
+                    else:
+                        print('Invalid input, try again.')
             pos = self.convert_to_x_y(pos)
             grid_check = self.validate_within_grid(user, pos)
             if start_or_end_type == 'starting' or placement_type == 'attack':
@@ -263,7 +288,7 @@ class Game:
                 user.board.grid[start_pos[1]][pos] = user.ships[i].tag
 
     def take_turn(self, user, opp):
-        self.display_grid(user)
+        self.display_turn(user)
         self.display_target_grid(user)
         self.display_score(user, opp)
         attack_pos = self.get_position(user, 0, 'target', '', 'attack')
@@ -303,6 +328,7 @@ class Game:
     def display_score(self, user, opp):
         print(
             f'You have sunk {user.score} ships and your opponent has sunk {opp.score} ships.')
+        print('')
 
     def play_again(self):
         valid_play_again = self.validate_yes_no('play_again', 'yes_no')

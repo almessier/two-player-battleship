@@ -27,3 +27,4 @@ class GameBoard:
             for x in range(len(grid[y])):
                 print(grid[y][x], end='  ')
             print()
+        print('')
