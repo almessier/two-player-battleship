@@ -1,1 +1,1 @@
-# two-player-battleship
+The classic game Battleship made in Python. This game is played in the terminal. Each player places four ships on their own 20 x 20 grid. Player 1 places all of their ships first, then Player 2 places their's after. After ships are placed, each player alternates attacking their opponents grid, known as the ocean grid. Each player on their turn can attack a cell on the enemy grid and can view their own target grid (shows attack hits/misses)/ocean grid. All grid coordinate prompts will be handled with LetterNumber inputs. (A1, A2, etc)
