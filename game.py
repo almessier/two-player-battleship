@@ -9,7 +9,7 @@ class Game:
 
     # Handles the logic for the flow of the game
     def run_game(self):
-        self.display_rules()
+        self.display_rules_and_confirm()
         play_status = True
         while(play_status == True):
             self.place_ships(self.user)
@@ -305,7 +305,7 @@ class Game:
             f'You have sunk {user.score} ships and your opponent has sunk {opp.score} ships.')
 
     def play_again(self):
-        valid_play_again = self.validate_yes_no('play_again')
+        valid_play_again = self.validate_yes_no('play_again', 'yes_no')
         if valid_play_again == 'y':
             self.user = Player()
             self.opp = Player()
@@ -334,17 +334,16 @@ class Game:
     def convert_to_y_value(self, input):
         return int(input) - 1
 
-    def convert_to_y_or_n(self, input):
+    def convert_to_y_or_n(self, input, qeustion_type):
         if input.lower() == 'yes' or input.lower() == 'y':
             return 'y'
-        elif input.lower() == 'no' or input.lower() == 'n':
+        elif input.lower() == 'no' or input.lower() == 'n' and qeustion_type == 'yes_no':
             return 'n'
         else:
             return 'invalid'
 
-    def validate_yes_no(self, type):
-        valid = False
-        while(valid == False):
+    def validate_yes_no(self, type, question_type):
+        while(True):
             if type == 'view_grid':
                 user_input = str(
                     input('Do you want to view your ocean grid? y/n: '))
@@ -353,12 +352,18 @@ class Game:
                     input('Are you done viewing your ocean grid? y/n: '))
             else:
                 user_input = str(input('Do you want to play again? y/n: '))
-            user_question = self.convert_to_y_or_n(user_input)
+            user_question = self.convert_to_y_or_n(user_input, question_type)
             if user_question == 'invalid':
-                valid = False
                 print('Invalid input, try again.')
             elif user_question == 'y' or 'n':
-                valid = True
                 return user_question
             else:
-                valid = False
+                pass
+
+    def display_rules_and_confirm(self):
+        while(True):
+            self.display_rules()
+            user_input = str(
+                input('Once you\'ve read the rules, type START to play: '))
+            if user_input.lower() == 'start':
+                break
