@@ -24,7 +24,7 @@ class Player:
     def pick_location(self, i, start_end_type, placement_type):
         if placement_type == 'attack':
             location = str(
-                input('Where would you like to attack? Grid goes from A1 to T20. Type OCEAN to view your ocean grid or TARGET to view your target grid: '))
+                input('Where would you like to attack? Grid goes from A1 to T20. You can also type OCEAN to view your ocean grid or TARGET to view your target grid: '))
         else:
             location = str(input(
                 f'Where would you like to place your {self.ships[i].name}\'s {start_end_type} location? It is {self.ships[i].length} units long. Grid goes from A1 to T20: '))

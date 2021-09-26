@@ -60,8 +60,17 @@ class Game:
         print(f'{user.name}\'s Turn')
 
     def display_score(self, user, opp):
-        print(
-            f'You have sunk {user.score} ships and your opponent has sunk {opp.score} ships.')
+        if user.score > 0:
+            print('You have sunk your opponent\'s:')
+            for i in range(len(opp.ships)):
+                if opp.ships[i].alive == False:
+                    print(f'{opp.ships[i].name}')
+        print('')
+        if opp.score > 0:
+            print('Your opponent has sunk your:')
+            for i in range(len(user.ships)):
+                if user.ships[i].alive == False:
+                    print(f'{user.ships[i].name}')
         print('')
 
     def display_victory(self):
@@ -92,13 +101,7 @@ class Game:
                     i, start_or_end_type, placement_type))
                 pos_check = self.validate_position_input(user, pos)
                 if pos_check == False:
-                    # Checks if user wants to view their grid
-                    if ''.join(pos).lower() == 'ocean':
-                        self.display_grid(user)
-                    elif ''.join(pos).lower() == 'target':
-                        self.display_target_grid(user)
-                    else:
-                        print('Invalid input, try again.')
+                    self.check_if_view_grid(user, placement_type, pos)
             pos = self.convert_to_x_y(pos)
             grid_check = self.validate_within_grid(user, pos)
             if start_or_end_type == 'starting' or placement_type == 'attack':
@@ -112,6 +115,15 @@ class Game:
             else:
                 print('Invalid input, try again.')
         return pos
+
+    # Checks if user wants to view their grid
+    def check_if_view_grid(self, user, placement_type, pos):
+        if ''.join(pos).lower() == 'ocean' and placement_type == 'attack':
+            self.display_grid(user)
+        elif ''.join(pos).lower() == 'target' and placement_type == 'attack':
+            self.display_target_grid(user)
+        else:
+            print('Invalid input, try again.')
 
     # Prompts user for starting x and y location of the ship then displays an updated grid
     def place_ship_starting_location(self, user, i):
